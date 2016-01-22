@@ -66,7 +66,6 @@ public class GravitySensor {
 
     public void start() {
         // 注册监听器
-        // 第一个参数是Listener，第二个参数是所得传感器类型，第三个参数值获取传感器信息的频率
         if (sensorManager != null) {
             sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_GRAVITY), SensorManager.SENSOR_DELAY_FASTEST);
         }

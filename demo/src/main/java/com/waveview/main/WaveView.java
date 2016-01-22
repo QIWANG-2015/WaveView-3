@@ -7,6 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.os.Build;
@@ -31,8 +32,8 @@ public class WaveView extends View {
     private int mHeight;
     private float mWaveHeightProportion;
     private int mWaveRange;
-    private int mLeftWave;
-    private int mRightWave;
+    private Point mLeftWavePoint;
+    private Point mRightWavePoint;
     private boolean leftUp;
 
 
@@ -63,6 +64,10 @@ public class WaveView extends View {
         mWavePaint.setColor(Color.parseColor("#87CEFF"));
         mWavePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
 
+        //用来控制波浪的贝塞尔曲线的两个控制点坐标
+        mLeftWavePoint = new Point();
+        mRightWavePoint = new Point();
+
         leftUp = true;//左右浮动方向判断（true为左上右下）
         mWaveHeightProportion = 0.6f;//水位百分比
 
@@ -75,12 +80,17 @@ public class WaveView extends View {
         if (changed) {
             mWidth = getWidth();
             mHeight = getHeight();
-            mWaveRange = mHeight / 10;//波纹上下浮动范围（总高度的10%）
+            mWaveRange = mHeight / 8;//波纹上下浮动范围（总高度的8分之一）
             //用来绘制底板图
             mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
-            mLeftWave = -mWaveRange;//左边波纹高度初始化
-            mRightWave = mWaveRange;//右边波纹高度初始化
+            //左边波纹位置初始化
+            //这里初始化的图像概念是，左边的水浪处于最低潮，右边的处于最高潮，浪的x轴位置分别是控件的4分之一和最右边
+            mLeftWavePoint.x = mWidth / 4;
+            mLeftWavePoint.y = -mWaveRange;
+            //右边波纹位置初始化
+            mRightWavePoint.x = mWidth;
+            mRightWavePoint.y = mWaveRange;
         }
     }
 
@@ -91,28 +101,47 @@ public class WaveView extends View {
         int waveHeight = (int) (mHeight - mHeight * mWaveHeightProportion);
         //水位一帧浮动的高度
         int waveYRange = mWaveRange / 30;
-        Log.d(TAG, waveHeight + "");
+        /**
+         * 水位每一帧浮动的宽度
+         * 这里240是因为，高度浮动范围是 /30，而高度范围是有正负的，所以就是说水波的上下运动是60次刷新完成的
+         * 而横向我想要的地洞范围只有空间的四分之一（一边水波为控件的一半，水波的一半就是控件的4分之一），就是mWidth/4；
+         * 有了然后分60次完成，每一次就是 mWidth/4/60 = mWidth / 240
+         * */
+        int waveXRange = mWidth / 240;
+
+        /**
+         * 这里主要对每一帧 贝塞尔曲线的控制点位置做修改，不需要太注重我的写法，主要思路就是通过不断移动两个控制点模拟波浪
+         * 最好是通过实践自己推理出一套能想到最好的曲线运动
+         * 我的做法是 两个控制点 y轴相对方向匀速运动   x轴同向运动 具体效果可以运行看看
+         * */
         //左上右下
         if (leftUp) {
-            mLeftWave += waveYRange;
-            mRightWave -= waveYRange;
-            if (mLeftWave >= mWaveRange) {
+            mLeftWavePoint.x -= waveXRange;
+            mRightWavePoint.x -= waveXRange;
+            mLeftWavePoint.y += waveYRange;
+            mRightWavePoint.y -= waveYRange;
+            if (mLeftWavePoint.y >= mWaveRange) {
                 leftUp = !leftUp;
             }
-        } else {//左下右上
-            mLeftWave -= waveYRange;
-            mRightWave += waveYRange;
-            if (mRightWave >= mWaveRange) {
+        } else {
+            //左下右上
+            mLeftWavePoint.x += waveXRange;
+            mRightWavePoint.x += waveXRange;
+            mLeftWavePoint.y -= waveYRange;
+            mRightWavePoint.y += waveYRange;
+            if (mRightWavePoint.y >= mWaveRange) {
                 leftUp = !leftUp;
             }
         }
-        //波纹两端浮动高度（波纹起点和重点配合波浪做轻微浮动）
-        int mBeginHeight = mLeftWave / 5;
-        int mEndHeight = mRightWave / 5;
+
+        //波纹两端浮动高度（波纹起点和终点配合波浪做轻微浮动，左右两端固定不动太没有真实感了）
+        int mBeginHeight = mLeftWavePoint.y / 5;
+        int mEndHeight = mRightWavePoint.y / 5;
         //重置波纹路径
         mPath.reset();
         mPath.moveTo(0, waveHeight + mBeginHeight);
-        mPath.cubicTo(mWidth / 4, waveHeight + mLeftWave, mWidth / 4 * 3, waveHeight + mRightWave, getWidth(), waveHeight + mEndHeight);
+        Log.d(TAG, mLeftWavePoint.y + "  ----------  " + mRightWavePoint.y);
+        mPath.cubicTo(mLeftWavePoint.x, waveHeight + mLeftWavePoint.y, mRightWavePoint.x, waveHeight + mRightWavePoint.y, getWidth(), waveHeight + mEndHeight);
         mPath.lineTo(getWidth(), getHeight());
         mPath.lineTo(0, getHeight());
         mPath.close();
@@ -124,10 +153,10 @@ public class WaveView extends View {
         //将bitmap画到VIEW的画布上
         canvas.drawBitmap(mBitmap, 0, 0, mCirclePaint);
         //水纹荡起到顶部时，减慢速度模拟下落时重力抵消的缓冲效果
-        if (mLeftWave >= mWaveRange / 5 * 4 || mRightWave >= mWaveRange / 5 * 4)
+        if (mLeftWavePoint.y >= mWaveRange / 5 * 4 || mRightWavePoint.y >= mWaveRange / 5 * 4)
             postInvalidateDelayed(40);
         else
-            postInvalidateDelayed(10);
+            postInvalidateDelayed(5);
 
     }
 
