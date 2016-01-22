@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
+/**
+ * Created by SiKang on 2016/1/21.
+ */
 public class MainActivity extends Activity {
     private GravitySensor mGravitySensor;
     private WaveView mWaveView;

@@ -11,7 +11,7 @@ import android.os.Vibrator;
 import android.util.Log;
 
 /**
- * Created by SiKang on 2016/1/5.
+ * Created by SiKang on 2016/1/21.
  */
 public class GravitySensor {
     private final String TAG = "GravitySensorTest";
@@ -51,7 +51,6 @@ public class GravitySensor {
             float angle = 40 * (x / 10);
             //如果变化大于0.1刷新UI
             if (Math.abs(Math.abs(angle) - Math.abs(nowAngle)) > 0.1f) {
-                Log.d(TAG,"111");
                 Message msg = new Message();
                 msg.obj = nowAngle = angle;
                 mHandler.sendMessageDelayed(msg, 300);
