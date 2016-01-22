@@ -75,7 +75,7 @@ public class WaveView extends View {
         if (changed) {
             mWidth = getWidth();
             mHeight = getHeight();
-            mWaveRange = mHeight / 20;//波纹上下浮动范围（总高度的10%）
+            mWaveRange = mHeight / 10;//波纹上下浮动范围（总高度的10%）
             //用来绘制底板图
             mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
