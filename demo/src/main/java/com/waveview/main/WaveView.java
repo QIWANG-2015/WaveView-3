@@ -34,7 +34,7 @@ public class WaveView extends View {
     private int mLeftWave;
     private int mRightWave;
     private boolean leftUp;
-    private GravitySensor mGravitySensor;
+
 
     public WaveView(Context context) {
         super(context);
@@ -48,9 +48,6 @@ public class WaveView extends View {
     }
 
     private void init(Context context) {
-        //初始化重力传感器，并开启监听
-        mGravitySensor = GravitySensor.getInstance(context, mHandler);
-        mGravitySensor.start();
         //波纹路径
         mPath = new Path();
         //圆球画笔
@@ -71,15 +68,6 @@ public class WaveView extends View {
 
     }
 
-    private Handler mHandler = new Handler(new Handler.Callback() {
-        @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-        @Override
-        public boolean handleMessage(Message msg) {
-            //更新角度
-            setRotation((float) msg.obj);
-            return false;
-        }
-    });
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
@@ -181,4 +169,6 @@ public class WaveView extends View {
         }
         return true;
     }
+
+
 }

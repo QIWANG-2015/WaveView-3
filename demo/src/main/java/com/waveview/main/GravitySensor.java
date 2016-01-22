@@ -51,6 +51,7 @@ public class GravitySensor {
             float angle = 40 * (x / 10);
             //如果变化大于0.1刷新UI
             if (Math.abs(Math.abs(angle) - Math.abs(nowAngle)) > 0.1f) {
+                Log.d(TAG,"111");
                 Message msg = new Message();
                 msg.obj = nowAngle = angle;
                 mHandler.sendMessageDelayed(msg, 300);
@@ -77,6 +78,7 @@ public class GravitySensor {
     }
 
     public void destory() {
+        sensorManager=null;
         mVibratorSensor = null;
     }
 }
