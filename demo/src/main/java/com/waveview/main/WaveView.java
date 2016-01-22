@@ -187,6 +187,8 @@ public class WaveView extends View {
                     while (!add) {
                         if (mWaveHeightProportion > 0.4)
                             mWaveHeightProportion -= 0.01;
+                        else
+                            add=!add;
                         try {
                             Thread.sleep(10);
                         } catch (InterruptedException e) {
