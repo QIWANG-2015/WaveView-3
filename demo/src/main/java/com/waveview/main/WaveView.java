@@ -30,7 +30,7 @@ public class WaveView extends View {
     private int mWaveRange;
     private Point mLeftWavePoint;
     private Point mRightWavePoint;
-    private boolean leftUp;
+    private boolean isLeftUp;
 
 
     public WaveView(Context context) {
@@ -64,7 +64,7 @@ public class WaveView extends View {
         mLeftWavePoint = new Point();
         mRightWavePoint = new Point();
 
-        leftUp = true;//左右浮动方向判断（true为左上右下）
+        isLeftUp = true;//左右浮动方向判断（true为左上右下）
         mWaveHeightProportion = 0.6f;//水位百分比
 
     }
@@ -111,13 +111,13 @@ public class WaveView extends View {
          * 我的做法是 两个控制点 y轴相对方向匀速运动   x轴同向运动 具体效果可以运行看看
          * */
         //左上右下
-        if (leftUp) {
+        if (isLeftUp) {
             mLeftWavePoint.x -= waveXRange;
             mRightWavePoint.x -= waveXRange;
             mLeftWavePoint.y += waveYRange;
             mRightWavePoint.y -= waveYRange;
             if (mLeftWavePoint.y >= mWaveRange) {
-                leftUp = !leftUp;
+                isLeftUp = !isLeftUp;
             }
         } else {
             //左下右上
@@ -126,7 +126,7 @@ public class WaveView extends View {
             mLeftWavePoint.y -= waveYRange;
             mRightWavePoint.y += waveYRange;
             if (mRightWavePoint.y >= mWaveRange) {
-                leftUp = !leftUp;
+                isLeftUp = !isLeftUp;
             }
         }
 
