@@ -75,7 +75,7 @@ public class WaveView extends View {
         if (changed) {
             mWidth = getWidth();
             mHeight = getHeight();
-            mWaveRange = mHeight / 10;//波纹上下浮动范围（总高度的10%）
+            mWaveRange = mHeight / 20;//波纹上下浮动范围（总高度的10%）
             //用来绘制底板图
             mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.ARGB_8888);
             mCanvas = new Canvas(mBitmap);
@@ -123,7 +123,12 @@ public class WaveView extends View {
         mCanvas.drawPath(mPath, mWavePaint);
         //将bitmap画到VIEW的画布上
         canvas.drawBitmap(mBitmap, 0, 0, mCirclePaint);
-        postInvalidateDelayed(10);//刷新
+        //水纹荡起到顶部时，减慢速度模拟下落时重力抵消的缓冲效果
+        if (mLeftWave >= mWaveRange / 5 * 4 || mRightWave >= mWaveRange / 5 * 4)
+            postInvalidateDelayed(40);
+        else
+            postInvalidateDelayed(10);
+
     }
 
     boolean add = false;
