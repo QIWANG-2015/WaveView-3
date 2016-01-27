@@ -100,8 +100,8 @@ public class WaveView extends View {
         /**
          * 水位每一帧浮动的宽度
          * 这里240是因为，高度浮动范围是 /30，而高度范围是有正负的，所以就是说水波的上下运动是60次刷新完成的
-         * 而横向我想要的地洞范围只有空间的四分之一（一边水波为控件的一半，水波的一半就是控件的4分之一），就是mWidth/4；
-         * 有了然后分60次完成，每一次就是 mWidth/4/60 = mWidth / 240
+         * 而横向我想要的移动范围是控件的四分之一（一边水波占控件的一半，水波的一半就是控件的4分之一），就是mWidth/4；
+         * 有了x轴的运动范围，然后把它分60次完成，每一次就是 mWidth/4/60 = mWidth / 240
          * */
         int waveXRange = mWidth / 240;
 
@@ -148,7 +148,7 @@ public class WaveView extends View {
         mCanvas.drawPath(mPath, mWavePaint);
         //将bitmap画到VIEW的画布上
         canvas.drawBitmap(mBitmap, 0, 0, mCirclePaint);
-        //水纹荡起到顶部时，减慢速度模拟下落时重力抵消的缓冲效果
+        //水纹荡起到顶部时，减慢速度模拟下落时重力抵消的缓冲效果，缓冲范围是水浪运动范围的的五分之一
         if (mLeftWavePoint.y >= mWaveRange / 5 * 4 || mRightWavePoint.y >= mWaveRange / 5 * 4)
             postInvalidateDelayed(40);
         else
